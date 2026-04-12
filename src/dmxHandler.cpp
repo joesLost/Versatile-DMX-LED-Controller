@@ -1,11 +1,11 @@
 #include "dmxHandler.h"
-#include "leds.h"
+// #include "leds.h"
 #include "globals.h" 
 
 byte data[DMX_PACKET_SIZE]; 
 bool dmxIsConnected = false;
 //Hardcoded DMX Start Address
-int dmxAddress = 500;
+int dmxAddress = 0;
 unsigned long lastUpdate = 0;
 dmx_port_t dmxPort = 1;
 dmx_config_t config = DMX_CONFIG_DEFAULT;
@@ -31,14 +31,14 @@ void dmxHandler(void *pvParameters) {
         if (now - lastUpdate > 1000) {
           Serial.printf("Start code is 0x%02X and slot 1 is 0x%02X\n", data[0], data[1]);
           // Log each DMX value to the serial monitor
-          for (int i = 1 + dmxAddress; i < 9 + dmxAddress; i++) {
+          for (int i = 1; i <= 32; i++) {
             Serial.printf("DMX Channel %d: %d\n", i, data[i]);
           }
           lastUpdate = now;
         }
         
         // Process DMX channels
-        processDMXChannels();
+        // processDMXChannels();
       } else {
         Serial.println("A DMX error occurred.");
       }
@@ -79,14 +79,14 @@ void processDMXChannels() {
   int red8 = data[22 + dmxAddress];
   int green8 = data[23 + dmxAddress];
   int blue8 = data[24 + dmxAddress];
-  setLEDColor(1, red1, green1, blue1);
-  setLEDColor(2, red2, green2, blue2);
-  setLEDColor(3, red3, green3, blue3);
-  setLEDColor(4, red4, green4, blue4);
-  setLEDColor(5, red5, green5, blue5);
-  setLEDColor(6, red6, green6, blue6);
-  setLEDColor(7, red7, green7, blue7);
-  setLEDColor(8, red8, green8, blue8);
+  // setLEDColor(1, red1, green1, blue1);
+  // setLEDColor(2, red2, green2, blue2);
+  // setLEDColor(3, red3, green3, blue3);
+  // setLEDColor(4, red4, green4, blue4);
+  // setLEDColor(5, red5, green5, blue5);
+  // setLEDColor(6, red6, green6, blue6);
+  // setLEDColor(7, red7, green7, blue7);
+  // setLEDColor(8, red8, green8, blue8);
   
   // MotorCommand cmd;
   // // Channel 1: Preset Clock Modes

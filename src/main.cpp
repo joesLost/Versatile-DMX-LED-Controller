@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "dmxHandler.h"
-#include "leds.h"
+// #include "leds.h"
 #include "globals.h"
 
 void serialHandler(void* pvParameters);
@@ -11,12 +11,9 @@ void setup() {
   Serial.println("Setup starting...");
   delay(1000); //Needed but I forgot why...
 
-  pinMode(PUL_PIN_HR, OUTPUT);
-  pinMode(PUL_PIN_MIN, OUTPUT);
-  pinMode(DIR_PIN, OUTPUT);
 
   // Initialize LEDs
-  initializeLEDs();
+  // initializeLEDs();
 
   dmx_driver_install(dmxPort, &config, personalities, 1);
   dmx_set_pin(dmxPort, TX_PIN, RX_PIN, RTS_PIN);
@@ -67,7 +64,7 @@ void serialHandler(void *pvParameters) {
       Serial.println(command);
 
       if (command == "LEDTest") {
-        LEDTest();
+        //LEDTest();
       } else {
         Serial.println("Unknown command.");
       }
