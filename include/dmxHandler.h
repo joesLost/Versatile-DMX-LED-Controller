@@ -7,9 +7,8 @@
 #define TX_PIN 17
 #define RX_PIN 16
 #define RTS_PIN 4
-#define DMX_PACKET_SIZE 512
+#define DMX_PACKET_SIZE 513
 #define DMX_TIMEOUT_TICK 1000
-
 
 extern byte data[DMX_PACKET_SIZE];
 extern bool dmxIsConnected;
@@ -18,11 +17,11 @@ extern dmx_port_t dmxPort;
 extern dmx_config_t config;
 extern dmx_personality_t personalities[];
 
-// Function declarations
 void dmxHandler(void* pvParameters);
 void processDMXChannels();
+void processTreeDmx();
 
-#endif // DMXHANDLER_H
+#endif
 
 
 // LED Controller DMX Control Profile Overview
