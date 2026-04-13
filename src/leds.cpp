@@ -1,72 +1,74 @@
 #include "leds.h"
 
-// Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, LED_PIN, NEO_RGB + NEO_KHZ800);
+bool ENABLE_LED5 = true;
+bool ENABLE_LED6 = true;
+bool ENABLE_LED7 = true;
+bool ENABLE_LED8 = true;
 
-// void initializeLEDs() {
-//   strip.begin();
-//   strip.setBrightness(255);
-//   strip.show();
-// }
+CRGB leds[NUM_LEDS];
 
-//Old code update!! use fast led
-// void setLEDColor(int target, int red, int green, int blue) {
-//   static int prevInt = 0,prevRed = 0, prevGreen = 0, prevBlue = 0;
+RgbOut pwmOuts[] = {
+  { 18, 19, 21, 0, 1, 2, &ENABLE_LED5, "LED5" },
+  { 22, 23, 25, 3, 4, 5, &ENABLE_LED6, "LED6" },
+  { 26, 27, 32, 6, 7, 8, &ENABLE_LED7, "LED7" },
+  { 4, 5, 33, 9, 10, 11, &ENABLE_LED8, "LED8" }
+};
 
-//   // Only proceed if there's a change
-//   if (
-//     // intensity != prevInt || 
-//     red != prevRed || green != prevGreen || blue != prevBlue) {
-//     for (int i = 0; i < NUM_LEDS; i++) {
-//       strip.setPixelColor(i, strip.Color(red, green, blue));
-//     }
-//     // Store the current values for the next check
-//     prevRed = red;
-//     prevGreen = green;
-//     prevBlue = blue;
-//     // prevInt = intensity;
-//   }
-//   // strip.setBrightness(intensity);
-//   strip.show();
-// }
+void initializeLEDs() {
+  FastLED.addLeds<LED_TYPE, LED1_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+  FastLED.addLeds<LED_TYPE, LED2_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+  FastLED.addLeds<LED_TYPE, LED3_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+  FastLED.addLeds<LED_TYPE, LED4_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+  FastLED.setBrightness(BRIGHTNESS);
+}
 
-// void LEDTest() {
-//   Serial.println("Starting LED test");
+void setLEDColor(int intensity, int red, int green, int blue) {
+  FastLED.setBrightness(intensity);
+  fill_solid(leds, NUM_LEDS, CRGB(red, green, blue));
+  FastLED.show();
+}
 
-//   Serial.println("Quick GRB flash");
+void showPattern(const char* name, const CRGB& c1, const CRGB& c2, const CRGB& c3, int ms) {
+  for (int i = 0; i < NUM_LEDS; i += 3) {
+    leds[i] = c1;
+    if (i + 1 < NUM_LEDS) leds[i + 1] = c2;
+    if (i + 2 < NUM_LEDS) leds[i + 2] = c3;
+  }
+  FastLED.show();
+  delay(ms);
+}
 
-//   // Flash RGB quickly
-//   for (int i = 0; i < 3; i++) {
-//     setLEDColor(255, 255, 0, 0); // Red
-//     delay(300);
+void setPwm(const RgbOut& o, uint8_t r, uint8_t g, uint8_t b) {
+  if (!*o.enabled) r = g = b = 0;
+  ledcWrite(o.rCh, r);
+  ledcWrite(o.gCh, g);
+  ledcWrite(o.bCh, b);
+}
 
-//     setLEDColor(255, 0, 255, 0); // Green
-//     delay(300);
+void showPwmColor(const char* name, uint8_t r, uint8_t g, uint8_t b, int ms) {
+  for (auto& o : pwmOuts) setPwm(o, r, g, b);
+  delay(ms);
+}
 
-//     setLEDColor(255, 0, 0, 255); // Blue
-//     delay(300);
-//   }
-//   Serial.println("Max White 5s"); // All LEDs on max brightness for 5 seconds
-//   setLEDColor(255, 255, 255, 255); // White
-//   delay(5000);
+void setupPwm() {
+  for (auto& o : pwmOuts) {
+    ledcSetup(o.rCh, PWM_FREQ, PWM_RES);
+    ledcAttachPin(o.rPin, o.rCh);
+    ledcSetup(o.gCh, PWM_FREQ, PWM_RES);
+    ledcAttachPin(o.gPin, o.gCh);
+    ledcSetup(o.bCh, PWM_FREQ, PWM_RES);
+    ledcAttachPin(o.bPin, o.bCh);
+  }
+}
 
-//   Serial.println("RGB cycle 2s each"); // Cycle through RGB at 2 seconds each
-//   setLEDColor(255, 255, 0, 0); // Red
-//   delay(2000);
+void LEDTest() {
+  initializeLEDs();
+  setupPwm();
 
-//   setLEDColor(255, 0, 255, 0); // Green
-//   delay(2000);
+  showPattern("RGB", CRGB::Red, CRGB::Green, CRGB::Blue, 2000);
+  showPattern("White", CRGB::White, CRGB::White, CRGB::White, 2000);
 
-//   setLEDColor(255, 0, 0, 255); // Blue
-//   delay(2000);
-
-//   Serial.println("Rainbow effect 5s"); // Rainbow effect for 5 seconds
-//   unsigned long start = millis();
-//   while (millis() - start < 5000) {
-//     for (int i = 0; i < NUM_LEDS; i++) {
-//       int pixelHue = (i * 65536L / NUM_LEDS) + (millis() - start) * 256;
-//       strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
-//     }
-//     strip.show();
-//     delay(20);
-//   }
-//}
+  showPwmColor("Red", 255, 0, 0, 2000);
+  showPwmColor("Green", 0, 255, 0, 2000);
+  showPwmColor("Blue", 0, 0, 255, 2000);
+}
